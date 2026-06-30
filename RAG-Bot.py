@@ -1,5 +1,6 @@
 import os
-os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:65532"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:65532"
 
 from pathlib import Path
 from pypdf import PdfReader
@@ -26,13 +27,14 @@ for pdf_path in sorted(pdf_dir.glob("*.pdf")):
 
 spliter = RecursiveCharacterTextSplitter(
     chunk_size = 500,
-    chunk_overlap = 50
+    chunk_overlap = 50,
+    separators=["\n\n", "\n", "。", "，", " ", ""]
 )
 
 chunks = spliter.split_documents(documents)
 
 embedding = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2",
+    model_name="BAAI/bge-small-zh-v1.5",
     model_kwargs={"device": "cpu"},
 )
 
@@ -50,6 +52,6 @@ queries = [
 ]
 
 for q in queries:
-    results = vectorsotre.similarity_search(q,k=2)
+    results = vectorsotre.similarity_search(q,k=4)
     for j,doc in enumerate(results):
         print(f"  [{j+1}] {doc.page_content[:100]}...")
